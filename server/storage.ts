@@ -1,11 +1,14 @@
-import { presets, type Preset, type InsertPreset } from "@shared/schema";
+import { presets, timerHistory, type Preset, type InsertPreset, type TimerHistory, type InsertTimerHistory } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 
 export interface IStorage {
   getPresets(): Promise<Preset[]>;
   createPreset(preset: InsertPreset): Promise<Preset>;
   deletePreset(id: number): Promise<void>;
+  getTimerHistory(): Promise<TimerHistory[]>;
+  createTimerHistory(history: InsertTimerHistory): Promise<TimerHistory>;
+  getTimerStats(): Promise<{ totalTime: number; sessionCount: number; todayTime: number }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -20,6 +23,29 @@ export class DatabaseStorage implements IStorage {
 
   async deletePreset(id: number): Promise<void> {
     await db.delete(presets).where(eq(presets.id, id));
+  }
+
+  async getTimerHistory(): Promise<TimerHistory[]> {
+    return await db.select().from(timerHistory).orderBy(desc(timerHistory.completedAt)).limit(50);
+  }
+
+  async createTimerHistory(insertHistory: InsertTimerHistory): Promise<TimerHistory> {
+    const [history] = await db.insert(timerHistory).values(insertHistory).returning();
+    return history;
+  }
+
+  async getTimerStats(): Promise<{ totalTime: number; sessionCount: number; todayTime: number }> {
+    const allHistory = await db.select().from(timerHistory);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const todayHistory = allHistory.filter(h => new Date(h.completedAt) >= today);
+    
+    return {
+      totalTime: allHistory.reduce((sum, h) => sum + h.duration, 0),
+      sessionCount: allHistory.length,
+      todayTime: todayHistory.reduce((sum, h) => sum + h.duration, 0)
+    };
   }
 }
 

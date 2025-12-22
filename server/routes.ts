@@ -35,6 +35,33 @@ export async function registerRoutes(
     res.status(204).send();
   });
 
+  // Timer History Routes
+  app.get(api.history.list.path, async (req, res) => {
+    const history = await storage.getTimerHistory();
+    res.json(history);
+  });
+
+  app.post(api.history.create.path, async (req, res) => {
+    try {
+      const input = api.history.create.input.parse(req.body);
+      const history = await storage.createTimerHistory(input);
+      res.status(201).json(history);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({
+          message: err.errors[0].message,
+          field: err.errors[0].path.join('.'),
+        });
+      }
+      throw err;
+    }
+  });
+
+  app.get(api.history.stats.path, async (req, res) => {
+    const stats = await storage.getTimerStats();
+    res.json(stats);
+  });
+
   // Seed default presets if empty
   const existing = await storage.getPresets();
   if (existing.length === 0) {

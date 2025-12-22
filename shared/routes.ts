@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { insertPresetSchema, presets } from './schema';
+import { insertPresetSchema, insertTimerHistorySchema, presets, timerHistory } from './schema';
 
 export const errorSchemas = {
   validation: z.object({
@@ -38,6 +38,35 @@ export const api = {
       responses: {
         204: z.void(),
         404: errorSchemas.notFound,
+      },
+    },
+  },
+  history: {
+    list: {
+      method: 'GET' as const,
+      path: '/api/history',
+      responses: {
+        200: z.array(z.custom<typeof timerHistory.$inferSelect>()),
+      },
+    },
+    create: {
+      method: 'POST' as const,
+      path: '/api/history',
+      input: insertTimerHistorySchema,
+      responses: {
+        201: z.custom<typeof timerHistory.$inferSelect>(),
+        400: errorSchemas.validation,
+      },
+    },
+    stats: {
+      method: 'GET' as const,
+      path: '/api/history/stats',
+      responses: {
+        200: z.object({
+          totalTime: z.number(),
+          sessionCount: z.number(),
+          todayTime: z.number(),
+        }),
       },
     },
   },
