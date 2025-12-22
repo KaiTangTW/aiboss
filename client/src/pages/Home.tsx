@@ -5,7 +5,6 @@ import { Controls } from "@/components/Controls";
 import { PresetList } from "@/components/PresetList";
 import { DurationInput } from "@/components/DurationInput";
 import { TimerSettings, type TimerStyleSettings, getSoundUrl } from "@/components/TimerSettings";
-import { TimerStats } from "@/components/TimerStats";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Banner } from "@/components/Banner";
 import { FullscreenTimer, FullscreenButton } from "@/components/FullscreenTimer";
@@ -408,9 +407,6 @@ export default function Home() {
 
         {/* Sidebar */}
         <div className="flex flex-col gap-6">
-          {/* Stats */}
-          <TimerStats />
-          
           {/* Presets */}
           {!timerStyle.pomodoroMode && (
             <Card className="glass-panel rounded-3xl border-0">
