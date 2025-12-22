@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useBanner, useUpdateBanner } from "@/hooks/use-banner";
 import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Save, Image, Link, LogIn, LogOut, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Image, Link, LogIn, LogOut, Loader2, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/auth-utils";
 
@@ -15,10 +15,12 @@ export default function Admin() {
   const { data: banner, isLoading } = useBanner();
   const updateBanner = useUpdateBanner();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [imageUrl, setImageUrl] = useState("");
   const [linkUrl, setLinkUrl] = useState("");
   const [isActive, setIsActive] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     if (banner) {
@@ -27,6 +29,62 @@ export default function Admin() {
       setIsActive(banner.isActive === 1);
     }
   }, [banner]);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "檔案類型錯誤",
+        description: "請選擇圖片檔案",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const response = await fetch("/api/uploads/request-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: file.name,
+          size: file.size,
+          contentType: file.type,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to get upload URL");
+      }
+
+      const { uploadURL, objectPath } = await response.json();
+
+      await fetch(uploadURL, {
+        method: "PUT",
+        body: file,
+        headers: { "Content-Type": file.type },
+      });
+
+      setImageUrl(objectPath);
+      toast({
+        title: "上傳成功",
+        description: "圖片已上傳",
+      });
+    } catch (error) {
+      toast({
+        title: "上傳失敗",
+        description: "請稍後再試",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
 
   const handleSave = () => {
     if (!imageUrl.trim() || !linkUrl.trim()) {
@@ -70,7 +128,6 @@ export default function Admin() {
     });
   };
 
-  // Show loading state
   if (authLoading) {
     return (
       <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
@@ -79,7 +136,6 @@ export default function Admin() {
     );
   }
 
-  // Show login prompt if not authenticated
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-background text-foreground p-6">
@@ -137,18 +193,42 @@ export default function Admin() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="imageUrl" className="flex items-center gap-2">
+              <Label className="flex items-center gap-2">
                 <Image className="w-4 h-4" />
-                圖片網址
+                Banner 圖片
               </Label>
-              <Input
-                id="imageUrl"
-                placeholder="https://example.com/banner.jpg"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                className="rounded-xl"
-                data-testid="input-image-url"
-              />
+              <div className="flex gap-2">
+                <Input
+                  id="imageUrl"
+                  placeholder="圖片網址或上傳圖片"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  className="rounded-xl flex-1"
+                  data-testid="input-image-url"
+                />
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  data-testid="input-file-upload"
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                  className="rounded-xl gap-2"
+                  data-testid="button-upload"
+                >
+                  {isUploading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Upload className="w-4 h-4" />
+                  )}
+                  上傳
+                </Button>
+              </div>
               <p className="text-xs text-muted-foreground">
                 建議尺寸：1200 x 200 像素（或類似的橫幅比例）
               </p>
