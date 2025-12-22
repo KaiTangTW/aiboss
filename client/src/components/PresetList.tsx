@@ -75,38 +75,38 @@ export function PresetList({ onSelect }: PresetListProps) {
               </p>
             </div>
             
-            <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg"
-                    onClick={(e) => e.stopPropagation()}
+            {/* Delete button - top left, far from play button */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-2 left-2 h-7 w-7 text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="rounded-2xl">
+                <AlertDialogHeader>
+                  <AlertDialogTitle>刪除預設</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    確定要刪除「{preset.name}」嗎？此操作無法復原。
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="rounded-xl">取消</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => deletePreset.mutate(preset.id)}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl"
                   >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className="rounded-2xl">
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>刪除預設</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      確定要刪除「{preset.name}」嗎？此操作無法復原。
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel className="rounded-xl">取消</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => deletePreset.mutate(preset.id)}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl"
-                    >
-                      刪除
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
+                    刪除
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
 
+            {/* Play button - bottom right */}
             <Button
               size="icon"
               variant="ghost"
