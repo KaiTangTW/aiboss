@@ -6,9 +6,17 @@ interface TimerDisplayProps {
   totalDuration: number;
   timeLeft: number;
   isActive: boolean;
+  fontFamily?: string;
+  color?: string;
 }
 
-export function TimerDisplay({ totalDuration, timeLeft, isActive }: TimerDisplayProps) {
+export function TimerDisplay({ 
+  totalDuration, 
+  timeLeft, 
+  isActive,
+  fontFamily = "font-mono",
+  color = "text-foreground"
+}: TimerDisplayProps) {
   // Calculate progress (100 to 0)
   const percentage = totalDuration > 0 ? (timeLeft / totalDuration) * 100 : 0;
 
@@ -50,7 +58,7 @@ export function TimerDisplay({ totalDuration, timeLeft, isActive }: TimerDisplay
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0.8, y: -5 }}
               transition={{ duration: 0.2 }}
-              className="font-mono font-bold tracking-tighter text-foreground timer-shadow text-4xl sm:text-6xl"
+              className={`${fontFamily} font-bold tracking-tighter ${color} timer-shadow text-4xl sm:text-6xl`}
             >
               {formatTime(timeLeft)}
             </motion.div>
@@ -59,7 +67,7 @@ export function TimerDisplay({ totalDuration, timeLeft, isActive }: TimerDisplay
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="mt-2 text-sm sm:text-base font-medium text-muted-foreground uppercase tracking-widest"
+            className="mt-4 text-base sm:text-lg font-medium text-muted-foreground tracking-widest inline-block"
           >
             {isActive ? '計時中' : timeLeft === 0 ? '已完成' : '已暫停'}
           </motion.div>

@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useCreatePreset } from "@/hooks/use-presets";
+import { TimerSettings, type TimerStyleSettings } from "@/components/TimerSettings";
 
 interface ControlsProps {
   isActive: boolean;
@@ -22,6 +23,8 @@ interface ControlsProps {
   onStart: () => void;
   onPause: () => void;
   onReset: () => void;
+  timerStyle: TimerStyleSettings;
+  onStyleChange: (settings: TimerStyleSettings) => void;
 }
 
 export function Controls({
@@ -32,6 +35,8 @@ export function Controls({
   onStart,
   onPause,
   onReset,
+  timerStyle,
+  onStyleChange,
 }: ControlsProps) {
   const [presetName, setPresetName] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -85,6 +90,8 @@ export function Controls({
         >
           <RotateCcw className="w-5 h-5" />
         </Button>
+
+        <TimerSettings settings={timerStyle} onChange={onStyleChange} />
 
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>

@@ -3,8 +3,8 @@ import { TimerDisplay } from "@/components/TimerDisplay";
 import { Controls } from "@/components/Controls";
 import { PresetList } from "@/components/PresetList";
 import { DurationInput } from "@/components/DurationInput";
+import { TimerSettings, type TimerStyleSettings } from "@/components/TimerSettings";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Timer } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -16,6 +16,11 @@ export default function Home() {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
+  
+  const [timerStyle, setTimerStyle] = useState<TimerStyleSettings>({
+    fontFamily: "font-mono",
+    color: "text-foreground"
+  });
 
   // Initialize audio
   useEffect(() => {
@@ -129,7 +134,9 @@ export default function Home() {
               <TimerDisplay 
                 totalDuration={totalDuration} 
                 timeLeft={timeLeft} 
-                isActive={isActive && !isPaused} 
+                isActive={isActive && !isPaused}
+                fontFamily={timerStyle.fontFamily}
+                color={timerStyle.color}
               />
               
               <Controls 
@@ -140,6 +147,8 @@ export default function Home() {
                 onStart={handleStart}
                 onPause={handlePause}
                 onReset={handleReset}
+                timerStyle={timerStyle}
+                onStyleChange={setTimerStyle}
               />
             </CardContent>
           </Card>
