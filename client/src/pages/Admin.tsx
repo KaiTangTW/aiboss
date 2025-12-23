@@ -1,14 +1,25 @@
 import { useState, useEffect, useRef } from "react";
 import { useBanner, useUpdateBanner } from "@/hooks/use-banner";
 import { useAuth } from "@/hooks/use-auth";
+import { useQuery } from "@tanstack/react-query";
+import { getQueryFn } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Save, Image, Link, LogIn, LogOut, Loader2, Upload } from "lucide-react";
+import { ArrowLeft, Save, Image, Link, LogIn, LogOut, Loader2, Upload, Eye, Users, Timer, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/auth-utils";
+
+type AnalyticsData = {
+  totalPageViews: number;
+  todayPageViews: number;
+  uniqueVisitors: number;
+  todayVisitors: number;
+  totalTimerUsage: number;
+  todayTimerUsage: number;
+};
 
 export default function Admin() {
   const { user, isLoading: authLoading, isAuthenticated, logout } = useAuth();
@@ -16,6 +27,12 @@ export default function Admin() {
   const updateBanner = useUpdateBanner();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { data: analytics } = useQuery<AnalyticsData>({
+    queryKey: ['/api/analytics/stats'],
+    queryFn: getQueryFn({ on401: "returnNull" }),
+    enabled: isAuthenticated,
+  });
   
   const [imageUrl, setImageUrl] = useState("");
   const [linkUrl, setLinkUrl] = useState("");
@@ -185,6 +202,54 @@ export default function Admin() {
             </Button>
           </div>
         </div>
+
+        {/* Analytics Dashboard */}
+        {analytics && (
+          <div className="mb-6 grid grid-cols-2 gap-4">
+            <Card className="rounded-xl">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <Eye className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">總瀏覽次數</p>
+                    <p className="text-xl font-bold" data-testid="text-total-views">{analytics.totalPageViews}</p>
+                    <p className="text-xs text-muted-foreground">今日 {analytics.todayPageViews}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="rounded-xl">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <Users className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">訪客人數</p>
+                    <p className="text-xl font-bold" data-testid="text-unique-visitors">{analytics.uniqueVisitors}</p>
+                    <p className="text-xs text-muted-foreground">今日 {analytics.todayVisitors}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="rounded-xl col-span-2">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <Timer className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">計時器使用次數</p>
+                    <p className="text-xl font-bold" data-testid="text-timer-usage">{analytics.totalTimerUsage}</p>
+                    <p className="text-xs text-muted-foreground">今日 {analytics.todayTimerUsage}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         <Card className="rounded-3xl">
           <CardHeader>

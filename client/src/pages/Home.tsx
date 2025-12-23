@@ -15,6 +15,41 @@ import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateHistory } from "@/hooks/use-history";
 
+function getVisitorId(): string {
+  try {
+    let id = localStorage.getItem("visitor_id");
+    if (!id) {
+      id = typeof crypto !== 'undefined' && crypto.randomUUID 
+        ? crypto.randomUUID() 
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      localStorage.setItem("visitor_id", id);
+    }
+    return id;
+  } catch {
+    return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  }
+}
+
+async function trackPageView() {
+  try {
+    await fetch("/api/analytics/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ visitorId: getVisitorId(), path: "/" }),
+    });
+  } catch {}
+}
+
+async function trackTimerUsage(duration: number, type: string) {
+  try {
+    await fetch("/api/analytics/timer", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ visitorId: getVisitorId(), duration, type }),
+    });
+  } catch {}
+}
+
 const POMODORO_WORK = 25 * 60;
 
 const POMODORO_BREAK = 5 * 60;
@@ -39,6 +74,11 @@ export default function Home() {
     autoRepeat: false,
     pomodoroMode: false,
   });
+
+  // Track page view on mount
+  useEffect(() => {
+    trackPageView();
+  }, []);
 
   // Initialize audio
   useEffect(() => {
@@ -185,6 +225,9 @@ export default function Home() {
               duration: totalDuration,
               type: timerStyle.pomodoroMode ? (pomodoroPhase === "work" ? "pomodoro" : "break") : "focus"
             });
+            
+            // Track timer usage for analytics
+            trackTimerUsage(totalDuration, timerStyle.pomodoroMode ? "pomodoro" : "timer");
             
             // Always reset active state first
             setIsActive(false);
