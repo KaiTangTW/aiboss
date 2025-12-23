@@ -69,7 +69,7 @@ export default function Home() {
   
   const [timerStyle, setTimerStyle] = useState<TimerStyleSettings>({
     fontFamily: "font-mono",
-    color: "text-foreground",
+    color: "text-orange-500",
     soundEnabled: true,
     soundType: "bell",
     autoRepeat: false,
