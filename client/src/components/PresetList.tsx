@@ -74,16 +74,16 @@ export function PresetList({ onSelect }: PresetListProps) {
             </p>
           </div>
           
-          {/* Delete button - top left, far from play button */}
+          {/* Delete button - top right corner */}
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute top-2 left-2 h-7 w-7 text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute top-2 right-2 h-6 w-6 text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
                 onClick={(e) => e.stopPropagation()}
               >
-                <Trash2 className="w-3.5 h-3.5" />
+                <Trash2 className="w-3 h-3" />
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent className="rounded-2xl">
@@ -105,14 +105,14 @@ export function PresetList({ onSelect }: PresetListProps) {
             </AlertDialogContent>
           </AlertDialog>
 
-          {/* Play button - bottom right */}
+          {/* Play button - bottom left */}
           <Button
             size="icon"
             variant="ghost"
-            className="absolute bottom-4 right-4 h-10 w-10 text-primary/20 group-hover:text-primary group-hover:bg-primary/10 rounded-full transition-all"
+            className="absolute bottom-3 left-3 h-8 w-8 text-primary/30 group-hover:text-primary group-hover:bg-primary/10 rounded-full transition-all"
             onClick={() => onSelect(preset.duration)}
           >
-            <PlayCircle className="w-6 h-6 fill-current" />
+            <PlayCircle className="w-5 h-5 fill-current" />
           </Button>
         </div>
       ))}
