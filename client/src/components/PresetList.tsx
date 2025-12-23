@@ -60,62 +60,60 @@ export function PresetList({ onSelect }: PresetListProps) {
       {presets.map((preset) => (
         <div
           key={preset.id}
-          className="group relative bg-card hover:bg-muted/30 border border-border/50 hover:border-primary/30 rounded-2xl p-4 transition-all duration-200 shadow-sm hover:shadow-md"
+          className="group relative bg-card hover:bg-muted/30 border border-border/50 hover:border-primary/30 rounded-2xl p-4 pt-10 transition-all duration-200 shadow-sm hover:shadow-md"
         >
-          <div className="flex items-start justify-between">
-            <div 
-              className="flex-1 cursor-pointer pr-8"
-              onClick={() => onSelect(preset.duration)}
-            >
-              <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                {preset.name}
-              </h4>
-              <p className="text-2xl font-mono font-bold text-muted-foreground mt-1 group-hover:text-foreground transition-colors">
-                {formatDuration(preset.duration)}
-              </p>
-            </div>
-            
-            {/* Delete button - top left, far from play button */}
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-2 left-2 h-7 w-7 text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent className="rounded-2xl">
-                <AlertDialogHeader>
-                  <AlertDialogTitle>刪除預設</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    確定要刪除「{preset.name}」嗎？此操作無法復原。
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel className="rounded-xl">取消</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => deletePreset.mutate(preset.id)}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl"
-                  >
-                    刪除
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-
-            {/* Play button - bottom right */}
-            <Button
-              size="icon"
-              variant="ghost"
-              className="absolute bottom-4 right-4 h-10 w-10 text-primary/20 group-hover:text-primary group-hover:bg-primary/10 rounded-full transition-all"
-              onClick={() => onSelect(preset.duration)}
-            >
-              <PlayCircle className="w-6 h-6 fill-current" />
-            </Button>
+          <div 
+            className="cursor-pointer"
+            onClick={() => onSelect(preset.duration)}
+          >
+            <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+              {preset.name}
+            </h4>
+            <p className="text-2xl font-mono font-bold text-muted-foreground mt-1 group-hover:text-foreground transition-colors">
+              {formatDuration(preset.duration)}
+            </p>
           </div>
+          
+          {/* Delete button - top left, far from play button */}
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 left-2 h-7 w-7 text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="rounded-2xl">
+              <AlertDialogHeader>
+                <AlertDialogTitle>刪除預設</AlertDialogTitle>
+                <AlertDialogDescription>
+                  確定要刪除「{preset.name}」嗎？此操作無法復原。
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel className="rounded-xl">取消</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => deletePreset.mutate(preset.id)}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl"
+                >
+                  刪除
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          {/* Play button - bottom right */}
+          <Button
+            size="icon"
+            variant="ghost"
+            className="absolute bottom-4 right-4 h-10 w-10 text-primary/20 group-hover:text-primary group-hover:bg-primary/10 rounded-full transition-all"
+            onClick={() => onSelect(preset.duration)}
+          >
+            <PlayCircle className="w-6 h-6 fill-current" />
+          </Button>
         </div>
       ))}
     </div>
