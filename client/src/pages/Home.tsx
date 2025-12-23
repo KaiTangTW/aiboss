@@ -10,7 +10,8 @@ import { Banner } from "@/components/Banner";
 import { FullscreenTimer, FullscreenButton } from "@/components/FullscreenTimer";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Timer, Keyboard, Settings } from "lucide-react";
+import { Keyboard, Settings } from "lucide-react";
+import logoImage from "@assets/Gemini_Generated_Image_8sskpe8sskpe8ssk_1766503015543.png";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateHistory } from "@/hooks/use-history";
@@ -312,9 +313,7 @@ export default function Home() {
       {/* Header */}
       <div className="w-full max-w-4xl mb-12 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-primary/10 rounded-2xl">
-            <Timer className="w-6 h-6 text-primary" />
-          </div>
+          <img src={logoImage} alt="AI BOSS Logo" className="w-12 h-12 object-contain" />
           <div>
             <h1 className="text-2xl font-bold tracking-tight">時間效率神器</h1>
             <p className="text-sm text-muted-foreground">凱爺小工具</p>
