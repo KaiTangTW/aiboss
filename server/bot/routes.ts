@@ -252,7 +252,7 @@ export async function initBot() {
 
 // ========== HTML ==========
 
-const ADMIN_HTML = `<!DOCTYPE html>
+export const ADMIN_HTML = `<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">

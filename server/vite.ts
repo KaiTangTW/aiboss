@@ -5,8 +5,11 @@ import viteConfig from "../vite.config";
 import fs from "fs";
 import path from "path";
 import { nanoid } from "nanoid";
+import { ADMIN_HTML } from "./bot/routes";
 
 const viteLogger = createLogger();
+
+const MSG_HOST = "msg.aiboss.com.tw";
 
 export async function setupVite(server: Server, app: Express) {
   const serverOptions = {
@@ -32,6 +35,13 @@ export async function setupVite(server: Server, app: Express) {
   app.use(vite.middlewares);
 
   app.use("*", async (req, res, next) => {
+    // msg.aiboss.com.tw → Bot 管理後台
+    if (req.hostname === MSG_HOST) {
+      res.status(200).set({ "Content-Type": "text/html" }).end(ADMIN_HTML);
+      return;
+    }
+
+    // 其他域名 → Timer SPA
     const url = req.originalUrl;
 
     try {
