@@ -44,9 +44,20 @@ function appendAttachmentLinks(text: string, attachments: Attachment[]): string 
   return text + "\n\n" + links.join("\n");
 }
 
+function resolveUrl(url: string): string {
+  if (url.startsWith("/objects/")) {
+    return `https://msg.aiboss.com.tw${url}`;
+  }
+  return url;
+}
+
 function parseAttachments(raw?: string | null): Attachment[] {
   if (!raw) return [];
-  try { const arr = JSON.parse(raw); return Array.isArray(arr) ? arr : []; }
+  try {
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return [];
+    return arr.map(a => ({ ...a, url: resolveUrl(a.url) }));
+  }
   catch { return []; }
 }
 

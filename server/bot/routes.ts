@@ -263,7 +263,7 @@ export const ADMIN_HTML = `<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KaiBot 管理後台</title>
+<title>凱爺社群機器人</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: -apple-system, "Noto Sans TC", sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
@@ -401,10 +401,10 @@ tr:hover td { background: #334155; }
 
 <div class="login-page" id="login-page">
   <div class="login-box">
-    <h1>KaiBot</h1>
+    <h1>凱爺社群機器人</h1>
     <p>FB/IG 自動回覆機器人管理後台</p>
     <div id="login-content">
-      <a href="/api/login" class="login-btn">登入</a>
+      <a href="/api/login?returnTo=/bot-admin" class="login-btn">登入</a>
       <p style="margin-top:12px;font-size:12px;color:#64748b;">僅限 @2him.net 網域使用者</p>
     </div>
   </div>
@@ -413,7 +413,7 @@ tr:hover td { background: #334155; }
 <div class="app" id="app">
   <div class="sidebar">
     <div class="sidebar-header">
-      <h1>KaiBot</h1>
+      <h1>凱爺社群機器人</h1>
       <div class="user-info" id="user-email"></div>
     </div>
     <nav>
@@ -490,6 +490,18 @@ tr:hover td { background: #334155; }
           <button class="btn btn-primary" onclick="testReply()">測試</button>
         </div>
         <div class="test-result" id="test-result"><span style="color:#64748b;">輸入訊息後按「測試」，結果會顯示在這裡</span></div>
+        <div id="test-feedback" style="display:none;margin-top:16px;padding:16px;background:#1e293b;border:1px solid #334155;border-radius:8px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <label style="font-weight:600;color:#94a3b8;">💡 建議回覆（AI 學習）</label>
+            <span style="font-size:12px;color:#64748b;">儲存後將自動建立 FAQ，下次相同關鍵字會直接使用此回覆</span>
+          </div>
+          <textarea id="test-suggested-reply" rows="3" placeholder="輸入你認為更好的回覆內容..." style="width:100%;margin-bottom:10px;"></textarea>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="text" id="test-suggested-keywords" placeholder="關鍵字（逗號分隔），預設使用測試訊息" style="flex:1;">
+            <select id="test-suggested-category" style="width:120px;"><option value="">選擇分類</option><option value="價格">價格</option><option value="服務">服務</option><option value="合作">合作</option><option value="聯絡">聯絡</option><option value="回應">回應</option><option value="其他">其他</option></select>
+            <button class="btn btn-primary" onclick="saveTestAsFaq()">儲存為 FAQ</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -544,7 +556,11 @@ tr:hover td { background: #334155; }
     <div class="att-editor">
       <div class="att-editor-title">附件（選填）— 命中時隨回覆一起發送</div>
       <div id="att-list"></div>
-      <button class="btn btn-ghost btn-sm" onclick="addAttRow()" style="margin-top:4px;">+ 新增附件</button>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button class="btn btn-ghost btn-sm" onclick="addAttRow('image')">+ 新增圖片</button>
+        <button class="btn btn-ghost btn-sm" onclick="addAttRow('link')">+ 新增連結</button>
+        <button class="btn btn-ghost btn-sm" onclick="addAttRow('file')">+ 新增檔案</button>
+      </div>
     </div>
 
     <div class="modal-actions">
@@ -718,20 +734,39 @@ document.getElementById('kw-input').addEventListener('keydown',e=>{
 // ===== Attachment Editor =====
 let faqAttachments=[];
 function renderAtts() {
-  document.getElementById('att-list').innerHTML=faqAttachments.map((a,i)=>
-    '<div class="att-item">'
-      +'<select onchange="faqAttachments['+i+'].type=this.value">'
+  document.getElementById('att-list').innerHTML=faqAttachments.map((a,i)=>{
+    const isImg=a.type==='image';
+    const preview=isImg&&a.url?'<img src="'+esc(a.url)+'" style="max-width:80px;max-height:60px;border-radius:4px;margin-top:4px;" onerror="this.style.display=\\'none\\'">':'';
+    return '<div class="att-item" style="flex-wrap:wrap;">'
+      +'<select onchange="faqAttachments['+i+'].type=this.value;renderAtts();">'
         +'<option value="link"'+(a.type==='link'?' selected':'')+'>🔗 連結</option>'
         +'<option value="image"'+(a.type==='image'?' selected':'')+'>🖼️ 圖片</option>'
         +'<option value="file"'+(a.type==='file'?' selected':'')+'>📄 檔案</option>'
       +'</select>'
       +'<input placeholder="標題（選填）" value="'+esc(a.title||'')+'" onchange="faqAttachments['+i+'].title=this.value">'
-      +'<input placeholder="URL" value="'+esc(a.url||'')+'" onchange="faqAttachments['+i+'].url=this.value" style="flex:2;">'
+      +(isImg?'<button class="btn btn-sm btn-ghost" onclick="uploadAttImage('+i+')" style="white-space:nowrap;">📤 上傳圖片</button>':'')
+      +'<input placeholder="'+(isImg?'圖片 URL（或點上傳）':'URL')+'" value="'+esc(a.url||'')+'" onchange="faqAttachments['+i+'].url=this.value" id="att-url-'+i+'" style="flex:2;">'
       +'<span class="att-remove" onclick="faqAttachments.splice('+i+',1);renderAtts();">&times;</span>'
-    +'</div>'
-  ).join('');
+      +(preview?'<div style="width:100%;padding-left:4px;">'+preview+'</div>':'')
+    +'</div>';
+  }).join('');
 }
-function addAttRow() { faqAttachments.push({type:'link',url:'',title:''}); renderAtts(); }
+function addAttRow(type) { faqAttachments.push({type:type||'image',url:'',title:''}); renderAtts(); }
+function uploadAttImage(idx) {
+  const input=document.createElement('input');input.type='file';input.accept='image/*';
+  input.onchange=async()=>{
+    const file=input.files[0];if(!file)return;
+    if(file.size>5*1024*1024){toast('圖片不能超過 5MB');return;}
+    toast('上傳中...');
+    try{
+      const meta=await fetch('/api/uploads/request-url',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:file.name,size:file.size,contentType:file.type})}).then(r=>r.json());
+      await fetch(meta.uploadURL,{method:'PUT',headers:{'Content-Type':file.type},body:file});
+      faqAttachments[idx].url=meta.objectPath;
+      renderAtts();toast('圖片上傳成功');
+    }catch(e){console.error(e);toast('上傳失敗');}
+  };
+  input.click();
+}
 
 // ===== FAQ Modal =====
 function showFaqModal(id) {
@@ -793,6 +828,19 @@ async function testReply() {
       }).join('')+'</div>';
   }
   document.getElementById('test-result').innerHTML='<div style="margin-bottom:8px;"><span class="badge '+bc+'">'+lb+'</span> '+(res.faqId?'<span style="font-size:12px;color:#64748b;">('+esc(res.faqId)+')</span>':'')+'</div><div style="white-space:pre-wrap;">'+esc(res.reply)+'</div>'+attHtml;
+  // Show feedback area
+  document.getElementById('test-feedback').style.display='block';
+  document.getElementById('test-suggested-reply').value='';
+  document.getElementById('test-suggested-keywords').value=msg;
+  document.getElementById('test-suggested-keywords').placeholder='關鍵字（逗號分隔），預設使用測試訊息';
+}
+async function saveTestAsFaq(){
+  const reply=document.getElementById('test-suggested-reply').value.trim();
+  if(!reply){toast('請輸入建議回覆內容');return;}
+  const keywords=document.getElementById('test-suggested-keywords').value.trim()||document.getElementById('test-input').value.trim();
+  const category=document.getElementById('test-suggested-category').value||'其他';
+  const res=await fetch(API+'/faq',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({keywords,answer:reply,category,priority:5})}).then(r=>r.json());
+  if(res.success){toast('已儲存為 FAQ，AI 已學習此回覆');document.getElementById('test-feedback').style.display='none';}else{toast('儲存失敗：'+(res.error||''));}
 }
 
 // ===== Logs =====

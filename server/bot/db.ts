@@ -43,6 +43,38 @@ export async function initBotData() {
       await db.insert(botFaqs).values(faq);
     }
   }
+
+  // Demo 訊息日誌
+  const logCount = await db.select({ count: count() }).from(botMessageLogs);
+  if ((logCount[0]?.count ?? 0) === 0) {
+    const demoLogs = [
+      { platform: "facebook", type: "comment", senderId: "fb_user_10001", message: "請問你們的服務怎麼收費？", reply: "感謝您的詢問！關於價格方面，因為每個案子的需求不同，麻煩您私訊我們，我們會盡快為您提供詳細報價 😊", replySource: "faq" },
+      { platform: "facebook", type: "messenger", senderId: "fb_user_10002", message: "你好，想詢問合作事宜", reply: "感謝您的合作邀約！請將合作提案寄到我們的信箱，或直接私訊說明合作內容，我們會儘速回覆 🙏", replySource: "faq" },
+      { platform: "instagram", type: "dm", senderId: "ig_user_20001", message: "哈囉～想問一下你們有接品牌活動嗎？", reply: "嗨你好！我們有接品牌活動企劃喔～可以先跟我們聊聊你的需求和預算，我們再幫你規劃最適合的方案！歡迎直接私訊詳談 💪", replySource: "ai" },
+      { platform: "instagram", type: "comment", senderId: "ig_user_20002", message: "太厲害了！", reply: "謝謝你的支持！我們會繼續努力的 💪😊", replySource: "ai" },
+      { platform: "facebook", type: "comment", senderId: "fb_user_10003", message: "謝謝分享！", reply: "不客氣！有任何問題隨時都可以問我們 😊", replySource: "faq" },
+      { platform: "facebook", type: "messenger", senderId: "fb_user_10004", message: "你們的email是什麼", reply: "您可以透過以下方式聯繫我們：\n📩 私訊本粉專\n📧 Email: service@kaitang.tw\n我們會盡快回覆您！", replySource: "faq" },
+      { platform: "instagram", type: "dm", senderId: "ig_user_20003", message: "請問可以幫忙做社群代操嗎", reply: "當然可以！我們有提供社群經營代操的服務，包含內容企劃、素材設計和數據分析。方便的話先告訴我們你的品牌和目前的社群狀況，我們可以先幫你評估 📊", replySource: "ai" },
+      { platform: "facebook", type: "comment", senderId: "fb_user_10005", message: "多少錢", reply: "感謝您的詢問！關於價格方面，因為每個案子的需求不同，麻煩您私訊我們，我們會盡快為您提供詳細報價 😊", replySource: "faq" },
+      { platform: "instagram", type: "comment", senderId: "ig_user_20004", message: "想了解更多服務內容", reply: "我們提供品牌策略、整合行銷、社群經營、活動企劃等服務。想了解更多細節，歡迎私訊我們聊聊您的需求！", replySource: "faq" },
+      { platform: "facebook", type: "messenger", senderId: "fb_user_spam_001", message: "免費賺錢機會！點擊連結 https://spam.example.com", reply: "感謝您的訊息！我們的團隊會盡快回覆您 😊", replySource: "default" },
+    ];
+    for (const log of demoLogs) {
+      await db.insert(botMessageLogs).values(log);
+    }
+  }
+
+  // Demo 封鎖名單
+  const blockCount = await db.select({ count: count() }).from(botBlocklist);
+  if ((blockCount[0]?.count ?? 0) === 0) {
+    const demoBlocks = [
+      { senderId: "fb_user_spam_001", reason: "垃圾訊息 — 發送詐騙連結" },
+      { senderId: "ig_user_spam_002", reason: "重複洗版留言" },
+    ];
+    for (const block of demoBlocks) {
+      await db.insert(botBlocklist).values(block);
+    }
+  }
 }
 
 // ========== FAQ 操作 ==========
